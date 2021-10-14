@@ -1,0 +1,3 @@
+
+
+class BardBot(commands.Bot):

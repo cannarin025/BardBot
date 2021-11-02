@@ -25,9 +25,7 @@ class BardBot(commands.Bot):
                 )
             )
 
-    async def join_vc(self, ctx, voice):
-        channel = ctx.author.voice.channel
-
+    async def join_vc(self, channel, voice = None):
         if voice and voice.is_connected():
             await voice.move_to(channel)
         else:

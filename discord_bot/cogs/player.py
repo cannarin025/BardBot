@@ -1,7 +1,6 @@
 import discord
-
+import datetime
 from discord.ext import commands
-
 from discord_bot.bot import config
 
 from typing import Dict
@@ -29,7 +28,7 @@ class Player(commands.Cog):
         guild_id = voice_client.guild.id
         video = self.queue[guild_id][0]
         FFMPEG_OPTS = {'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5', 'options': '-vn'}
-        await ctx.send(f"Now playing {video.title} ({video.duration//60}:{video.duration%60})\n{video.url}")
+        await ctx.send(f"Now playing {video.title} ({str(datetime.timedelta(seconds=video.duration))})\n{video.url}")
         voice_client.play(FFmpegPCMAudio(self.queue[guild_id][0].source, **FFMPEG_OPTS), after=lambda e: self.queue[guild_id].pop(0))
         if voice_client.is_playing():
             self.search_results[guild_id] = None
@@ -55,7 +54,7 @@ class Player(commands.Cog):
             self.search_results[guild_id] = YtScraper.search(query, num_results=5)
             message = "Please select the video you would like to play!\n"
             for i, video in enumerate(self.search_results[guild_id]):
-                message += f"**{i+1}.** {video.title} ({video.duration//60}:{video.duration%60})\n"
+                message += f"**{i+1}.** {video.title} ({str(datetime.timedelta(seconds=video.duration))})\n"
             await ctx.send(message)
 
         else: # user selects track from list of options

@@ -3,7 +3,7 @@ BardBot is a custom music bot for my discord server.
 - Plays audio from youtube videos based on links or user queries.
 - Designed to be extended to other servers or self hosted by other users.
 
-##Getting Started
+## Getting Started
 Ensure Python 3.9 and pip are installed.
 
 Clone this repo and run the following in terminal.

@@ -48,6 +48,8 @@ class Player(commands.Cog):
                 voice_client = get(self.bot.voice_clients, guild=ctx.guild)
             if voice_client and not voice_client.is_playing():
                 await self.play_next(ctx, voice_client)
+            else:
+                await ctx.send(f"{video.title} added to queue!")
 
         elif not self.search_results[guild_id]: # user does not provide link
             self.search_results[guild_id] = YtScraper.search(query, num_results=5)
@@ -66,6 +68,8 @@ class Player(commands.Cog):
             self.queue[guild_id].append(video)
             if voice_client and not voice_client.is_playing():
                 await self.play_next(ctx, voice_client)
+            else:
+                await ctx.send(f"{video.title} added to queue!")
 
     @commands.command(name = "leave", help="Disconnects bot from channel and clears queue")
     async def leave(self, ctx):

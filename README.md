@@ -21,9 +21,14 @@ git submodule update --remote
 cd pycord
 pip install .
 ```
+## Usage
 To run the bot, use
 ```
 python main.py
 ```
 
 The bot uses the `~` prefix by default, which may be modified in `config.yml`. Sending `~help` in any text channel will bring up a help message.
+
+---
+
+If you find a bug please submit an issue!

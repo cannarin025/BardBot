@@ -1,5 +1,6 @@
 import discord
 import datetime
+import asyncio
 from discord.ext import commands
 from discord_bot.bot import config
 
@@ -24,12 +25,16 @@ class Player(commands.Cog):
         if guild_id not in self.queue.keys():
             self.queue[guild_id] = []
 
-    async def play_next(self, ctx, voice_client):
+    def play_next(self, voice_client):
         guild_id = voice_client.guild.id
         video = self.queue[guild_id][0]
         FFMPEG_OPTS = {'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5', 'options': '-vn'}
-        await ctx.send(f"Now playing {video.title} ({str(datetime.timedelta(seconds=video.duration))})\n{video.url}")
-        voice_client.play(FFmpegPCMAudio(self.queue[guild_id][0].source, **FFMPEG_OPTS), after=lambda e: self.queue[guild_id].pop(0))
+
+        def handle_after(e):
+            self.queue[guild_id].pop(0)
+            self.play_next(voice_client)
+
+        voice_client.play(FFmpegPCMAudio(self.queue[guild_id][0].source, **FFMPEG_OPTS), after=lambda e: handle_after(e))
         if voice_client.is_playing():
             self.search_results[guild_id] = None
 
@@ -46,7 +51,8 @@ class Player(commands.Cog):
                 await self.bot.join_vc(channel)
                 voice_client = get(self.bot.voice_clients, guild=ctx.guild)
             if voice_client and not voice_client.is_playing():
-                await self.play_next(ctx, voice_client)
+                await ctx.send(f"Now playing {video.title} ({str(datetime.timedelta(seconds=video.duration))})\n{video.url}")
+                self.play_next(voice_client)
             else:
                 await ctx.send(f"{video.title} added to queue!")
 
@@ -66,7 +72,8 @@ class Player(commands.Cog):
             video = self.search_results[guild_id][int(ctx.kwargs["query"]) - 1]
             self.queue[guild_id].append(video)
             if voice_client and not voice_client.is_playing():
-                await self.play_next(ctx, voice_client)
+                await ctx.send(f"Now playing {video.title} ({str(datetime.timedelta(seconds=video.duration))})\n{video.url}")
+                self.play_next(voice_client)
             else:
                 await ctx.send(f"{video.title} added to queue!")
 
@@ -106,7 +113,7 @@ class Player(commands.Cog):
         voice = get(self.bot.voice_clients, guild=ctx.guild)
         voice.pause()
         self.queue[ctx.guild.id].pop(0)
-        await self.play_next(ctx, voice)
+        self.play_next(voice)
 
     @commands.command(name="queue", help="Displays play queue.")
     async def queue(self, ctx):
